@@ -1,0 +1,40 @@
+<!doctype html>
+<html><meta name="viewport" content="width=device-width,initial-scale=1"><title>ZedComedy V2</title>
+<style>
+body{margin:0;background:#111;color:white;font:15px Arial}.app{max-width:520px;margin:auto;min-height:100vh;padding-bottom:80px}
+header{padding:18px;position:sticky;top:0;background:#111;border-bottom:1px solid #333;z-index:2}
+.logo{font-size:27px;font-weight:bold}.logo b{color:#ffc400}.search,input,textarea{background:#222;color:white;border:1px solid #444;border-radius:12px;padding:12px;box-sizing:border-box}
+.search{margin-top:12px}.search input{border:0;padding:0;width:90%;background:transparent}
+main{padding:12px 18px}.page{display:none}.active{display:block}
+.card,.person,.list{background:#1b1b1b;border:1px solid #292929;border-radius:15px;padding:12px;margin:10px 0}
+.hero{height:190px;background:linear-gradient(135deg,#ffc400,#543500);display:grid;place-items:center;font-size:65px;border-radius:13px}
+.people{display:flex;gap:12px;overflow:auto}.person{text-align:center;min-width:90px}.avatar{width:62px;height:62px;border-radius:50%;background:#ffc400;color:#111;display:grid;place-items:center;margin:auto;font-size:28px}
+.list{display:flex;align-items:center;gap:12px}.grow{flex:1}.muted{color:#999;font-size:12px}
+button{padding:9px 13px;border:0;border-radius:10px;background:#ffc400;font-weight:bold}.dark{background:#292929;color:white}
+.nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:min(520px,100%);height:65px;background:#181818;display:flex;justify-content:space-around;border-top:1px solid #333}.nav button{background:none;color:#888}.nav .sel{color:#ffc400}
+video{width:100%;border-radius:12px;margin-top:10px}.modal{display:none;position:fixed;inset:0;background:#000c;z-index:5;padding-top:30vh}.sheet{background:#181818;padding:20px;border-radius:18px 18px 0 0}.sheet input,.sheet textarea{width:100%;margin:7px 0}
+</style>
+<header><div class="logo">😎 Zed<b>Comedy</b> 🇿🇲</div><div class="muted">Discover • Upload • Support Zambian Talent</div>
+<div class="search">🔎 <input id="q" placeholder="Search comedians..." oninput="search()"></div></header>
+<main>
+<section id="home" class="page active"><h2>Trending Now 🔥</h2><div id="feed"></div><h2>Popular Comedians 🇿🇲</h2><div class="people" id="people"></div><h2>Latest Clips 🎬</h2><div id="clips"></div></section>
+<section id="discover" class="page"><h2>Discover Comedians</h2><div id="list"></div></section>
+<section id="upload" class="page"><h2>Upload a Comedy Clip 🎬</h2><div class="card">
+<p class="muted">Create a creator account first, then choose a video.</p>
+<textarea id="cap" placeholder="Caption"></textarea><input id="file" type="file" accept="video/*" onchange="preview()"><video id="pv" controls style="display:none"></video><br><button onclick="publish()">Publish 🚀</button></div></section>
+<section id="profile" class="page"><div class="card" style="text-align:center"><div class="avatar">😎</div><h2 id="pn">Guest Creator</h2><p id="ph" class="muted">@guest</p><button onclick="openModal()">Create Creator Account</button></div></section>
+</main>
+<nav class="nav"><button class="sel" onclick="page('home',this)">🏠<br>Home</button><button onclick="page('discover',this)">🔎<br>Discover</button><button onclick="page('upload',this)">➕<br>Upload</button><button onclick="page('profile',this)">👤<br>Profile</button></nav>
+<div id="modal" class="modal"><div class="sheet"><h2>Creator Account</h2><input id="name" placeholder="Creator name"><input id="handle" placeholder="@username"><textarea id="bio" placeholder="Short bio"></textarea><button onclick="account()">Create Account</button> <button class="dark" onclick="closeModal()">Cancel</button></div></div>
+<script>
+const cs=[["Mambwe Comedy","@mambwecomedy","Comedy • Skits","😂"],["Kebo","@kebo","Street Comedy","🤣"],["Lusaka Laughs","@lusakalaughs","Stand-up • Skits","😎"],["Zed Skits","@zedskits","Short-form Comedy","😁"]];
+let a=JSON.parse(localStorage.zedAccount||"null"), own=[];
+function page(id,b){document.querySelectorAll(".page").forEach(x=>x.classList.remove("active"));document.getElementById(id).classList.add("active");document.querySelectorAll(".nav button").forEach(x=>x.classList.remove("sel"));b.classList.add("sel")}
+function render(){people.innerHTML=cs.slice(0,4).map(c=>'<div class="person"><div class="avatar">'+c[3]+'</div><b>'+c[0]+'</b><br><small class="muted">'+c[2]+'</small></div>').join("");list.innerHTML=cs.map(c=>'<div class="list"><div class="avatar">'+c[3]+'</div><div class="grow"><b>'+c[0]+'</b><div class="muted">'+c[1]+' • '+c[2]+'</div></div><button onclick="this.innerText=this.innerText==\'Follow\'?\'Following ✓\':\'Follow\'">Follow</button></div>').join("");feed.innerHTML='<div class="card"><div class="hero">😂</div><b>@MambweComedy</b><p class="muted">When your friend borrows your charger 😂</p></div>';clips.innerHTML=own.map(x=>'<div class="card"><video controls src="'+x.url+'"></video><b>'+x.name+'</b><p>'+x.cap+'</p></div>').join("")}
+function search(){let q=document.getElementById("q").value.toLowerCase();list.innerHTML=cs.filter(c=>(c[0]+c[1]+c[2]).toLowerCase().includes(q)).map(c=>'<div class="list"><div class="avatar">'+c[3]+'</div><div class="grow"><b>'+c[0]+'</b><div class="muted">'+c[1]+' • '+c[2]+'</div></div><button>Follow</button></div>').join("");page("discover",document.querySelectorAll(".nav button")[1])}
+function openModal(){modal.style.display="block"} function closeModal(){modal.style.display="none"}
+function account(){let n=name.value.trim(),h=handle.value.trim();if(!n||!h)return alert("Enter your name and username");a={name:n,handle:h.startsWith("@")?h:"@"+h};localStorage.zedAccount=JSON.stringify(a);pn.innerText=a.name;ph.innerText=a.handle;closeModal();page("profile",document.querySelectorAll(".nav button")[3])}
+function preview(){let f=file.files[0];if(f){pv.src=URL.createObjectURL(f);pv.style.display="block"}}
+function publish(){if(!a){openModal();return}let f=file.files[0];if(!f)return alert("Choose a video first");own.unshift({name:a.name,cap:cap.value||"New comedy clip 😂",url:URL.createObjectURL(f)});cap.value="";file.value="";pv.style.display="none";render();page("home",document.querySelectorAll(".nav button")[0])}
+if(a){pn.innerText=a.name;ph.innerText=a.handle} render();
+</script></html>
