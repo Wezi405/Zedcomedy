@@ -1,0 +1,167 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#111111">
+<title>ZedComedy 🇿🇲</title>
+<style>
+*{box-sizing:border-box}body{margin:0;background:#080808;color:#fff;font:15px Arial,sans-serif}
+.app{max-width:540px;margin:auto;min-height:100vh;background:#111;padding-bottom:78px}
+header{padding:16px 18px;position:sticky;top:0;background:#111;border-bottom:1px solid #292929;z-index:4}
+.logo{font-size:27px;font-weight:900}.logo b{color:#ffc400}.muted{color:#999;font-size:12px}
+.search{margin-top:12px;background:#202020;border:1px solid #383838;border-radius:24px;padding:11px 14px}
+.search input{width:88%;background:transparent;border:0;outline:0;color:#fff}
+main{padding:12px 18px}.page{display:none}.page.active{display:block}
+h2{font-size:20px;margin:18px 0 12px}.row{display:flex;justify-content:space-between;align-items:center}
+.card,.list{background:#1a1a1a;border:1px solid #2b2b2b;border-radius:16px;margin:10px 0;padding:12px}
+.hero{height:190px;border-radius:13px;background:linear-gradient(135deg,#ffc400,#543500);display:grid;place-items:center;font-size:70px}
+.people{display:flex;gap:12px;overflow:auto}.person{min-width:90px;text-align:center}
+.avatar{width:62px;height:62px;border-radius:50%;background:#ffc400;color:#111;display:grid;place-items:center;margin:auto;font-size:28px}
+.person b{display:block;font-size:12px;margin-top:6px}
+.clips{display:grid;grid-template-columns:1fr 1fr;gap:10px}.clip{background:#1a1a1a;border-radius:14px;overflow:hidden;border:1px solid #2b2b2b}
+.thumb{height:125px;background:linear-gradient(135deg,#333,#ffc400);display:grid;place-items:center;font-size:42px}.clip p{padding:0 9px;font-size:12px}
+.list{display:flex;align-items:center;gap:11px}.list .avatar{width:48px;height:48px;font-size:20px;flex:none}.grow{flex:1}
+button{border:0;border-radius:10px;padding:9px 12px;background:#ffc400;color:#111;font-weight:800}
+.dark{background:#292929;color:#fff}
+.nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:min(540px,100%);height:68px;background:#171717;border-top:1px solid #333;display:flex;justify-content:space-around;z-index:5}
+.nav button{background:none;color:#888;font-size:10px}.nav button.active{color:#ffc400}
+input,textarea{width:100%;background:#242424;color:#fff;border:1px solid #3b3b3b;border-radius:10px;padding:11px;margin:6px 0 10px;outline:0}
+textarea{min-height:75px}video{width:100%;border-radius:12px;margin-top:8px}
+.modal{display:none;position:fixed;inset:0;background:#000c;z-index:10;align-items:flex-end}.modal.show{display:flex}
+.sheet{width:min(540px,100%);margin:auto;background:#181818;border-radius:20px 20px 0 0;padding:20px;border:1px solid #333}
+.actions{display:flex;gap:8px;margin-top:8px}.actions button{flex:1}
+</style>
+</head>
+<body><div class="app">
+<header>
+<div class="logo">😎 Zed<b>Comedy</b> 🇿🇲</div>
+<div class="muted">Discover • Create • Support Zambian Talent</div>
+<div class="search">🔎 <input id="search" placeholder="Search comedians..." oninput="searchComedians()"></div>
+</header>
+<main>
+<section id="home" class="page active">
+<div class="row"><h2>Trending 🔥</h2><button class="dark" onclick="go('discover')">Discover</button></div>
+<div id="feed"></div>
+<h2>Popular Comedians 🇿🇲</h2><div id="people" class="people"></div>
+<h2>Latest Clips 🎬</h2><div id="clips" class="clips"></div>
+</section>
+
+<section id="discover" class="page">
+<div class="row"><h2>Discover</h2><button onclick="openModal()">Join</button></div>
+<div id="comedianList"></div>
+</section>
+
+<section id="upload" class="page">
+<h2>Upload a Comedy Clip 🎬</h2>
+<div class="card">
+<div id="uploadStatus" class="muted">Create a creator profile before publishing.</div>
+<textarea id="caption" placeholder="Write a funny caption..."></textarea>
+<input id="videoFile" type="file" accept="video/*" onchange="previewVideo()">
+<video id="preview" controls style="display:none"></video><br>
+<button onclick="publishClip()">Publish Clip 🚀</button>
+</div>
+<p class="muted">Prototype mode: clips are stored on this device. A public production app needs secure cloud storage.</p>
+</section>
+
+<section id="profile" class="page">
+<div class="card" style="text-align:center">
+<div class="avatar">😎</div><h2 id="profileName">Guest Creator</h2>
+<div id="profileHandle" class="muted">@guest</div>
+<div class="actions"><button onclick="openModal()">Edit Profile</button><button class="dark" onclick="go('upload')">Upload</button></div>
+</div>
+<h2>My Posts</h2><div id="myPosts"></div>
+</section>
+</main>
+
+<nav class="nav">
+<button class="active" onclick="go('home',this)">🏠<br>Home</button>
+<button onclick="go('discover',this)">🔎<br>Discover</button>
+<button onclick="go('upload',this)">➕<br>Upload</button>
+<button onclick="go('profile',this)">👤<br>Profile</button>
+</nav>
+
+<div id="modal" class="modal"><div class="sheet">
+<h2>Creator Profile</h2>
+<input id="name" placeholder="Creator name">
+<input id="handle" placeholder="@username">
+<textarea id="bio" placeholder="Short bio"></textarea>
+<button onclick="saveProfile()">Save Profile</button>
+<button class="dark" onclick="closeModal()">Cancel</button>
+</div></div>
+
+<script>
+const comedians=[
+["Mambwe Comedy","@mambwecomedy","Comedy • Skits","😂"],
+["Kebo","@kebo","Street Comedy","🤣"],
+["Lusaka Laughs","@lusakalaughs","Stand-up • Skits","😎"],
+["Zed Skits","@zedskits","Short-form Comedy","😁"],
+["Copperbelt Comedy","@cbcomedy","Sketches • Comedy","😆"]
+];
+let account=JSON.parse(localStorage.getItem("zedAccount")||"null");
+let posts=[];
+
+function go(id,btn){
+document.querySelectorAll(".page").forEach(x=>x.classList.remove("active"));
+document.getElementById(id).classList.add("active");
+document.querySelectorAll(".nav button").forEach(x=>x.classList.remove("active"));
+if(btn)btn.classList.add("active");window.scrollTo(0,0)
+}
+function renderPeople(){
+people.innerHTML=comedians.slice(0,4).map(c=>`<div class="person"><div class="avatar">${c[3]}</div><b>${c[0]}</b><span class="muted">${c[2]}</span></div>`).join("")
+}
+function renderList(arr=comedians){
+comedianList.innerHTML=arr.map(c=>`<div class="list"><div class="avatar">${c[3]}</div><div class="grow"><b>${c[0]}</b><div class="muted">${c[1]} • ${c[2]}</div></div><button onclick="toggleFollow(this)">Follow</button></div>`).join("")||"<div class='card'>No comedians found.</div>"
+}
+function toggleFollow(b){b.textContent=b.textContent==="Follow"?"Following ✓":"Follow"}
+function searchComedians(){
+let q=search.value.toLowerCase();
+renderList(comedians.filter(c=>(c[0]+c[1]+c[2]).toLowerCase().includes(q)));
+go("discover",document.querySelectorAll(".nav button")[1])
+}
+function renderClips(){
+let base=[
+["😂","When your friend borrows your charger","Mambwe Comedy"],
+["🤣","When parents hear exam results","Kebo"],
+["😆","That one friend who is always late","Lusaka Laughs"],
+["😁","Zambian school moments","Zed Skits"]
+];
+clips.innerHTML=[...posts,...base].map(p=>p[3]?
+`<div class="clip"><video controls src="${p[3]}"></video><p><b>${p[2]}</b><br>${p[1]}</p></div>`:
+`<div class="clip"><div class="thumb">${p[0]}</div><p><b>${p[2]}</b><br>${p[1]}<br><span class="muted">❤️ Trending</span></p></div>`).join("");
+feed.innerHTML=posts.length?
+`<div class="card"><b>Your latest post 🎉</b><p class="muted">${posts[0][1]}</p></div>`:
+`<div class="card"><div class="hero">😂</div><h3>@MambweComedy</h3><p class="muted">When your friend borrows your charger 😂</p><div class="actions"><button onclick="like(this)">❤️ Like</button><button class="dark" onclick="alert('Comments will be added in the online version.')">💬 Comment</button></div></div>`
+}
+function like(b){b.textContent=b.textContent==="❤️ Like"?"❤️ Liked":"❤️ Like"}
+function previewVideo(){
+let f=videoFile.files[0];if(f){preview.src=URL.createObjectURL(f);preview.style.display="block"}
+}
+function publishClip(){
+if(!account){openModal();return}
+let f=videoFile.files[0];if(!f){alert("Choose a video first");return}
+posts.unshift(["🎬",caption.value.trim()||"New comedy clip 😂",account.name,URL.createObjectURL(f)]);
+caption.value="";videoFile.value="";preview.style.display="none";
+renderClips();renderMyPosts();go("home",document.querySelectorAll(".nav button")[0])
+}
+function renderMyPosts(){
+myPosts.innerHTML=posts.map(p=>`<div class="card"><video controls src="${p[3]}"></video><b>${p[2]}</b><p class="muted">${p[1]}</p></div>`).join("")||"<p class='muted'>You haven't posted yet.</p>"
+}
+function openModal(){
+if(account){name.value=account.name;handle.value=account.handle;bio.value=account.bio||""}
+modal.classList.add("show")
+}
+function closeModal(){modal.classList.remove("show")}
+function saveProfile(){
+let n=name.value.trim(),h=handle.value.trim();
+if(!n||!h){alert("Enter a name and username");return}
+account={name:n,handle:h.startsWith("@")?h:"@"+h,bio:bio.value.trim()};
+localStorage.setItem("zedAccount",JSON.stringify(account));
+updateProfile();closeModal();go("profile",document.querySelectorAll(".nav button")[3])
+}
+function updateProfile(){
+if(account){profileName.textContent=account.name;profileHandle.textContent=account.handle;uploadStatus.textContent="Posting as "+account.name+" ("+account.handle+")"}
+}
+renderPeople();renderList();renderClips();renderMyPosts();updateProfile();
+</script>
+</div></body></html>
