@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ZedComedy 🇿🇲</title>
+<style>
+*{box-sizing:border-box}body{margin:0;background:#111;color:#fff;font-family:Arial,sans-serif;padding-bottom:82px}
+header{padding:16px 18px 12px;position:sticky;top:0;background:#111;z-index:5}
+.logo{font-size:30px;font-weight:800}.logo b{color:#ffc400}.tag{color:#aaa;margin-top:3px;font-size:15px}
+.search{margin-top:14px}.search input{width:100%;padding:17px 20px;border-radius:28px;border:1px solid #444;background:#222;color:#fff;font-size:17px;outline:none}
+main{padding:0 18px}.page{display:none}.page.active{display:block}
+.hero{background:linear-gradient(135deg,#ffc400,#6d4d00);border-radius:22px;padding:26px 20px;margin:12px 0 20px}
+.hero h1{margin:0 0 8px;font-size:28px}.hero p{margin:0;color:#111;font-weight:600}
+h2{font-size:24px}.chips{display:flex;gap:9px;overflow:auto;padding-bottom:8px}.chip{border:0;border-radius:20px;padding:10px 15px;background:#292929;color:#fff;white-space:nowrap}.chip.active{background:#ffc400;color:#111;font-weight:700}
+.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}.card{background:#1b1b1b;border:1px solid #333;border-radius:18px;padding:12px}.avatar{height:110px;border-radius:14px;background:linear-gradient(135deg,#ffc400,#8a6100);display:flex;align-items:center;justify-content:center;font-size:54px}.card h3{margin:10px 0 4px;font-size:17px}.card p{margin:0;color:#aaa;font-size:13px}.follow{margin-top:10px;width:100%;padding:9px;border:0;border-radius:12px;background:#ffc400;font-weight:700}
+.post{background:#1b1b1b;border:1px solid #333;border-radius:20px;padding:12px;margin:12px 0}.postimg{height:220px;border-radius:15px;background:linear-gradient(135deg,#ffc400,#704e00);display:flex;align-items:center;justify-content:center;font-size:80px}.post h3{margin:12px 0 5px}.post p{color:#bbb}.actions{display:flex;gap:10px}.actions button{flex:1;padding:11px;border:0;border-radius:12px;background:#292929;color:#fff;font-weight:700}.actions .like{background:#ffc400;color:#111}
+.profilebox{text-align:center;background:#1b1b1b;border:1px solid #333;border-radius:20px;padding:25px;margin-top:20px}.bigavatar{font-size:70px}.uploadbox{background:#1b1b1b;border:1px dashed #666;border-radius:20px;padding:28px;text-align:center;margin-top:20px}.uploadbox input{margin:15px 0;max-width:100%}
+nav{position:fixed;bottom:0;left:0;right:0;height:76px;background:#181818;border-top:1px solid #333;display:flex;z-index:10}nav button{flex:1;background:none;border:0;color:#888;font-size:13px;font-weight:700}nav button span{display:block;font-size:24px;margin-bottom:3px}nav button.active{color:#ffc400}
+.empty{color:#aaa;text-align:center;padding:30px}
+</style>
+</head>
+<body>
+<header>
+  <div class="logo">😎 Zed<b>Comedy</b> 🇿🇲</div>
+  <div class="tag">Discover • Create • Support Zambian Talent</div>
+  <div class="search"><input id="search" placeholder="🔎 Search comedians..." oninput="renderDiscover()"></div>
+</header>
+
+<main>
+<section id="home" class="page active">
+  <div class="hero"><h1>Welcome to ZedComedy 🇿🇲</h1><p>Find funny Zambian creators, discover new talent and support local comedy.</p></div>
+  <h2>Trending 😂</h2>
+  <div class="post"><div class="postimg">😂</div><h3>@MambweComedy</h3><p>When your friend borrows your charger 😂</p><div class="actions"><button class="like" onclick="like(this)">❤️ Like</button><button>💬 Comment</button></div></div>
+  <h2>Popular Comedians 🇿🇲</h2><div id="homePopular" class="grid"></div>
+</section>
+
+<section id="discover" class="page">
+  <h2>Discover Zambian Comedians 🇿🇲</h2>
+  <div class="chips">
+    <button class="chip active" onclick="filterBy('All',this)">All</button>
+    <button class="chip" onclick="filterBy('Skits',this)">Skits</button>
+    <button class="chip" onclick="filterBy('Stand-up',this)">Stand-up</button>
+    <button class="chip" onclick="filterBy('Music comedy',this)">Music comedy</button>
+  </div>
+  <div id="discoverGrid" class="grid"></div>
+</section>
+
+<section id="upload" class="page">
+  <h2>Upload your comedy 🎬</h2>
+  <div class="uploadbox">
+    <div style="font-size:50px">➕</div>
+    <p>Choose a video from your phone.</p>
+    <input type="file" accept="video/*">
+    <button class="follow" onclick="alert('Upload feature is ready for the next upgrade!')">Continue</button>
+  </div>
+</section>
+
+<section id="profile" class="page">
+  <h2>Your Profile 👤</h2>
+  <div class="profilebox"><div class="bigavatar">😎</div><h2>@wezi405</h2><p style="color:#aaa">ZedComedy creator</p><button class="follow">Edit Profile</button></div>
+</section>
+</main>
+
+<nav>
+<button class="active" onclick="showPage('home',this)"><span>🏠</span>Home</button>
+<button onclick="showPage('discover',this)"><span>🔎</span>Discover</button>
+<button onclick="showPage('upload',this)"><span>➕</span>Upload</button>
+<button onclick="showPage('profile',this)"><span>👤</span>Profile</button>
+</nav>
+
+<script>
+const comedians=[
+{name:'@MambweComedy',type:'Skits',emoji:'😂',bio:'Everyday Zambian comedy'},
+{name:'@BembaLaughs',type:'Stand-up',emoji:'🤣',bio:'Stand-up & funny stories'},
+{name:'@LusakaFunny',type:'Skits',emoji:'😎',bio:'Lusaka comedy creator'},
+{name:'@CopperbeltComedy',type:'Music comedy',emoji:'🎤',bio:'Music + comedy'},
+{name:'@ZedJokes',type:'Skits',emoji:'😆',bio:'Short funny skits'},
+{name:'@LaughsZambia',type:'Stand-up',emoji:'😁',bio:'New Zambian talent'}
+];
+let currentFilter='All';
+function showPage(id,btn){document.querySelectorAll('.page').forEach(x=>x.classList.remove('active'));document.getElementById(id).classList.add('active');document.querySelectorAll('nav button').forEach(x=>x.classList.remove('active'));btn.classList.add('active');if(id==='discover')renderDiscover();window.scrollTo(0,0)}
+function filterBy(type,btn){currentFilter=type;document.querySelectorAll('.chip').forEach(x=>x.classList.remove('active'));btn.classList.add('active');renderDiscover()}
+function renderDiscover(){const q=document.getElementById('search').value.toLowerCase();const list=comedians.filter(c=>(currentFilter==='All'||c.type===currentFilter)&&(!q||c.name.toLowerCase().includes(q)||c.bio.toLowerCase().includes(q)));document.getElementById('discoverGrid').innerHTML=list.length?list.map(c=>`<div class="card"><div class="avatar">${c.emoji}</div><h3>${c.name}</h3><p>${c.type} • ${c.bio}</p><button class="follow" onclick="this.textContent=this.textContent==='Follow'?'Following ✓':'Follow'">Follow</button></div>`).join(''):'<div class="empty" style="grid-column:1/-1">No comedians found 🔎</div>'}
+function like(btn){btn.textContent=btn.textContent.includes('Like')?'❤️ Liked':'❤️ Like'}
+document.getElementById('homePopular').innerHTML=comedians.slice(0,4).map(c=>`<div class="card"><div class="avatar">${c.emoji}</div><h3>${c.name}</h3><p>${c.type}</p></div>`).join('');
+renderDiscover();
+</script>
+</body>
+</html>
